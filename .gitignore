@@ -38,3 +38,10 @@ captures/
 
 # Keystore files
 *.jks
+
+#Desktop Services Store
+.DS_Store
+
+#Google Analytics
+google-services.json
+
