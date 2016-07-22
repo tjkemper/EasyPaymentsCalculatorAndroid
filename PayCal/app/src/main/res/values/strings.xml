@@ -2,4 +2,7 @@
     <string name="app_name">PayCal</string>
     <string name="add_user_btn">Add User</string>
     <string name="calculate_btn">Calculate</string>
+    <string name="welcome_text">Welcome to PayCal, your solution to complicated split payments.\nConsider when roommates want to split costs. Typically your gas and electric bills are not exactly the same, so who gets paid and how much?\nPayCal will calculate the optimal solution to minimize the number of times money has to exchange hands so you can do better things with your time.</string>
+    <string name="try_it">Try It!</string>
+    <string name="goto_main_btn">Home</string>
 </resources>

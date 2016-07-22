@@ -1,9 +1,13 @@
 package io.kemper.paycal;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,18 +24,42 @@ import com.easyPayments.TransferObjects.PaymentCalculatorInput;
 import com.easyPayments.TransferObjects.PaymentCalculatorOutput;
 import com.easyPayments.TransferObjects.User;
 import com.easyPayments.services.EasyCalculateService;
+import com.google.android.gms.analytics.HitBuilders;
+import com.google.android.gms.analytics.Tracker;
 
-import org.w3c.dom.Text;
 
-import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import io.kemper.paycal.app.PayCalApplication;
+
 public class CalculatorActivity extends Activity {
 
+    private static final String TAG = "CalculatorActivity";
+
+    /**
+     * The {@link Tracker} used to record screen views.
+     */
+    private Tracker mTracker;
+
+    /*
+     * linear layoutParams
+     */
     private final LinearLayout.LayoutParams linearLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+
+    /*
+     * layout references
+     */
+    private LinearLayout userListLayout;
+    private LinearLayout resultsLayout;
+
+    /*
+     *
+     */
+    private List<UserUi> userUiList = new ArrayList<>();
+
 
     private class UserUi {
         private EditText name;
@@ -64,11 +92,14 @@ public class CalculatorActivity extends Activity {
             }
         };
 
-        public UserUi(){
+        public UserUi(String nameText, String expenseText){
             //name
             name = new EditText(CalculatorActivity.this);
             name.setLayoutParams(editTextNameLayoutParams);
             name.setHint("name");
+            if(!TextUtils.isEmpty(nameText)){
+                name.setText(nameText);
+            }
 
             //expense
             expense = new EditText(CalculatorActivity.this);
@@ -76,6 +107,9 @@ public class CalculatorActivity extends Activity {
             expense.setHint("0.00");
             expense.setGravity(Gravity.RIGHT);
             expense.setInputType(InputType.TYPE_CLASS_PHONE);
+            if(!TextUtils.isEmpty(expenseText)){
+                expense.setText(expenseText);
+            }
 
             //removeBtn
             removeBtn = new Button(CalculatorActivity.this);
@@ -107,9 +141,6 @@ public class CalculatorActivity extends Activity {
     }
 
 
-    private List<UserUi> userUiList = new ArrayList<>();
-    private LinearLayout userListLayout;
-    private LinearLayout resultsLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -117,12 +148,32 @@ public class CalculatorActivity extends Activity {
         setContentView(R.layout.activity_calculator);
 
         userListLayout = (LinearLayout)findViewById(R.id.user_list_layout);
-        Button myBtn = (Button)findViewById(R.id.my_btn);
+
+        if(savedInstanceState != null){
+            //retrieve userUiList
+            ArrayList<String> nameList = savedInstanceState.getStringArrayList("nameList");
+            ArrayList<String> expenseList = savedInstanceState.getStringArrayList("expenseList");
+            for(int i = 0; i < nameList.size(); i++){
+                UserUi newUser = new UserUi(nameList.get(i), expenseList.get(i));
+                userUiList.add(newUser);
+                userListLayout.addView(newUser.getLinearWrapper());
+
+            }
+
+        }
+
+        // Obtain the shared Tracker instance.
+        PayCalApplication application = (PayCalApplication) getApplication();
+        mTracker = application.getDefaultTracker();
+
+
+
+        Button myBtn = (Button)findViewById(R.id.add_user_btn);
 
         myBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                UserUi newUser = new UserUi();
+                UserUi newUser = new UserUi(null, null);
                 userUiList.add(newUser);
 
                 userListLayout.addView(newUser.getLinearWrapper());
@@ -134,7 +185,46 @@ public class CalculatorActivity extends Activity {
 
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        Log.i(TAG, "Setting screen name: " + "activity_calculator");
+        mTracker.setScreenName("Image~" + "activity_calculator");
+        mTracker.send(new HitBuilders.ScreenViewBuilder().build());
+    }
+
+    //persist userUiList onSaveInstanceState
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        ArrayList<String> nameList = new ArrayList<>();
+        ArrayList<String> expenseList = new ArrayList<>();
+        for(UserUi userUi : userUiList){
+            nameList.add(userUi.getName().getText().toString());
+            expenseList.add(userUi.getExpense().getText().toString());
+        }
+        outState.putStringArrayList("nameList", nameList);
+        outState.putStringArrayList("expenseList", expenseList);
+    }
+
+    public void onClickGoHome(View view) {
+        Intent intent = new Intent(CalculatorActivity.this, MainActivity.class);
+        startActivity(intent);
+    }
+
     public void onClickCalculate(View view) {
+
+        int numUsers = userUiList.size();
+
+        mTracker.send(new HitBuilders.EventBuilder()
+                .setCategory("Calculator")
+                .setAction("Calculate")
+                //.setLabel("")
+                .setValue(numUsers)
+                .build());
+
 
         PaymentCalculatorInput input = new PaymentCalculatorInput();
         List<User> inputUserList = new ArrayList<>();
