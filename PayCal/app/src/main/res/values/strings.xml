@@ -7,4 +7,8 @@
     <string name="welcome_text_one">Less napkin math - Guaranteed.</string>
     <string name="try_it">Try It!</string>
     <string name="goto_main_btn">Home</string>
+    <string name="directions_header">Directions</string>
+    <string name="explanation">Consider several roommates, each responsible for different utilities.  After the utilities are paid, you have to pay each other to even it out.  That\'s where PayCal comes in handy.  Enter the amount each person has paid, and we\'ll give you the easiest way to settle the score.\n\n</string>
+    <string name="directions_step1">Step 1 : Enter expenses</string>
+    <string name="directions_step2">Step 2 : Save napkins\u00A0\u00A0\u00A0</string>
 </resources>
