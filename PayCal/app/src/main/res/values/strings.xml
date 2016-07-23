@@ -4,8 +4,7 @@
     <string name="app_name_cal">Cal</string>
     <string name="add_user_btn">Add User</string>
     <string name="calculate_btn">Calculate</string>
-    <string name="welcome_text_one">When you want to split the bill</string>
-    <string name="welcome_text_two">But you paid different amounts.</string>
+    <string name="welcome_text_one">Less napkin math - Guaranteed.</string>
     <string name="try_it">Try It!</string>
     <string name="goto_main_btn">Home</string>
 </resources>
