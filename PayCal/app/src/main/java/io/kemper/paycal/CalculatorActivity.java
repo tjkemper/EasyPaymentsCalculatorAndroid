@@ -18,7 +18,10 @@ import android.view.ViewParent;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.LinearLayout;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 
@@ -57,7 +60,7 @@ public class CalculatorActivity extends Activity {
      * layout references
      */
     private LinearLayout userListLayout;
-    private LinearLayout resultsLayout;
+    private TableLayout resultsLayout;
 
     /*
      *
@@ -306,10 +309,16 @@ public class CalculatorActivity extends Activity {
     }
 
     private void generateResultsLayout(PaymentCalculatorInput input, PaymentCalculatorOutput output){
-        resultsLayout = (LinearLayout) findViewById(R.id.results_layout);
+        resultsLayout = (TableLayout) findViewById(R.id.results_layout);
         resultsLayout.removeAllViews();
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
-        LinearLayout.LayoutParams noResultsLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
+
+        //LayoutParams for each table row
+        TableLayout.LayoutParams tableRowLayoutParams = new TableLayout.LayoutParams(TableLayout.LayoutParams.FILL_PARENT, TableLayout.LayoutParams.FILL_PARENT, 1.0f);
+
+        //LayoutParams for each table row child
+        TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT, 1.0f);
+
+        //LinearLayout.LayoutParams noResultsLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
 
 
         for(Payment payment : output.getPayments()){
@@ -329,20 +338,14 @@ public class CalculatorActivity extends Activity {
             }
 
             //String for amount
-
             String amountStr = NumberFormat.getCurrencyInstance().format(payment.getAmount());
-
-            //DecimalFormat df = new DecimalFormat("#.##");
-            //String amountStr = df.format(payment.getAmount());
-
-            //String text = String.format("%s   pays   %s   %s", from, to, amountStr);
-
 
 
             TextView fromView = new TextView(CalculatorActivity.this);
             fromView.setLayoutParams(layoutParams);
-            fromView.setGravity(Gravity.LEFT);
+            fromView.setGravity(Gravity.FILL_HORIZONTAL);
             fromView.setText(from);
+
 
             TextView paysView = new TextView(CalculatorActivity.this);
             paysView.setLayoutParams(layoutParams);
@@ -359,28 +362,29 @@ public class CalculatorActivity extends Activity {
             amountView.setGravity(Gravity.RIGHT);
             amountView.setText(amountStr);
 
-
-            LinearLayout linearWrapper = new LinearLayout(CalculatorActivity.this);
-            linearWrapper.setOrientation(LinearLayout.HORIZONTAL);
-            linearWrapper.setLayoutParams(linearLayoutParams);
-
-            linearWrapper.addView(fromView);
-            linearWrapper.addView(paysView);
-            linearWrapper.addView(toView);
-            linearWrapper.addView(amountView);
-
-            resultsLayout.addView(linearWrapper);
+            //Add new TableRow to TableLayout
+            TableRow newRow = new TableRow(CalculatorActivity.this);
+            newRow.setLayoutParams(tableRowLayoutParams);
+            newRow.addView(fromView);
+            newRow.addView(paysView);
+            newRow.addView(toView);
+            newRow.addView(amountView);
+            resultsLayout.addView(newRow);
 
         }
 
         if(output.getPayments().size() == 0){
+            TableRow newRow = new TableRow(CalculatorActivity.this);
+            newRow.setLayoutParams(tableRowLayoutParams);
 
             TextView noResultsView = new TextView(CalculatorActivity.this);
-            noResultsView.setLayoutParams(noResultsLayoutParams);
+            noResultsView.setLayoutParams(layoutParams);
             noResultsView.setGravity(Gravity.CENTER_HORIZONTAL);
             noResultsView.setText("No recommendation found.");
 
-            resultsLayout.addView(noResultsView);
+            newRow.addView(noResultsView);
+
+            resultsLayout.addView(newRow);
 
 
         }
