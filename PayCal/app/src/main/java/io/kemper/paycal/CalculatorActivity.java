@@ -1,17 +1,21 @@
 package io.kemper.paycal;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.Editable;
 import android.text.InputType;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -106,10 +110,39 @@ public class CalculatorActivity extends Activity {
             expense.setLayoutParams(editTextExpenseLayoutParams);
             expense.setHint("0.00");
             expense.setGravity(Gravity.RIGHT);
-            expense.setInputType(InputType.TYPE_CLASS_PHONE);
+            expense.setInputType(InputType.TYPE_CLASS_NUMBER);
             if(!TextUtils.isEmpty(expenseText)){
                 expense.setText(expenseText);
             }
+
+            expense.addTextChangedListener(new TextWatcher() {
+
+                boolean ignoreChange = false;
+
+                @Override
+                public void afterTextChanged(Editable s) {}
+
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+                @Override
+                public void onTextChanged(CharSequence s, int start,
+                                          int before, int count) {
+                    if (!ignoreChange) {
+                        String cleanString = s.toString().replaceAll("[$,.]", "");
+
+                        ignoreChange = true;
+
+                        double parsed = Double.parseDouble(cleanString);
+                        String formatted = NumberFormat.getCurrencyInstance().format((parsed/100));
+                        expense.setText(formatted);
+                        expense.setSelection(expense.getText().length());
+
+
+                        ignoreChange = false;
+                    }
+                }
+            });
 
             //removeBtn
             removeBtn = new Button(CalculatorActivity.this);
@@ -147,6 +180,10 @@ public class CalculatorActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calculator);
 
+        // Obtain the shared Tracker instance.
+        PayCalApplication application = (PayCalApplication) getApplication();
+        mTracker = application.getDefaultTracker();
+
         userListLayout = (LinearLayout)findViewById(R.id.user_list_layout);
 
         if(savedInstanceState != null){
@@ -162,23 +199,25 @@ public class CalculatorActivity extends Activity {
 
         }
 
-        // Obtain the shared Tracker instance.
-        PayCalApplication application = (PayCalApplication) getApplication();
-        mTracker = application.getDefaultTracker();
-
-
-
-        Button myBtn = (Button)findViewById(R.id.add_user_btn);
-
-        myBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        int numUserDefault = 3;
+        if(userUiList.size() == 0){
+            for(int i = 0; i < numUserDefault; i++){
                 UserUi newUser = new UserUi(null, null);
                 userUiList.add(newUser);
-
                 userListLayout.addView(newUser.getLinearWrapper());
+            }
+        }
 
 
+        Button addUserBtn = (Button)findViewById(R.id.add_user_btn);
+
+        addUserBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                UserUi newUser = new UserUi(null, null);
+                userUiList.add(newUser);
+                userListLayout.addView(newUser.getLinearWrapper());
 
             }
         });
@@ -216,8 +255,14 @@ public class CalculatorActivity extends Activity {
 
     public void onClickCalculate(View view) {
 
-        int numUsers = userUiList.size();
+        //Hide soft keyboard
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
 
+        //Google Analytics
+        int numUsers = userUiList.size();
         mTracker.send(new HitBuilders.EventBuilder()
                 .setCategory("Calculator")
                 .setAction("Calculate")
@@ -235,9 +280,12 @@ public class CalculatorActivity extends Activity {
             String name = user.getName().getText().toString();
             String expenseStr = user.getExpense().getText().toString();
 
+
+
             double expenseValue = 0;
             try {
-                expenseValue = Double.valueOf(expenseStr);
+                String cleanString = expenseStr.toString().replaceAll("[$,.]", "");
+                expenseValue = Double.parseDouble(cleanString)/100;
             }catch(NumberFormatException e){
 
             }
@@ -281,8 +329,8 @@ public class CalculatorActivity extends Activity {
             }
 
             //String for amount
-            NumberFormat formatter = NumberFormat.getCurrencyInstance();
-            String amountStr = formatter.format(payment.getAmount());
+
+            String amountStr = NumberFormat.getCurrencyInstance().format(payment.getAmount());
 
             //DecimalFormat df = new DecimalFormat("#.##");
             //String amountStr = df.format(payment.getAmount());
@@ -336,8 +384,8 @@ public class CalculatorActivity extends Activity {
 
 
         }
-
-
     }
+
+
 
 }
