@@ -3,6 +3,8 @@ package io.kemper.paycal;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -11,6 +13,7 @@ import android.text.InputType;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.KeyEvent;
 import android.view.View;
@@ -328,7 +331,22 @@ public class CalculatorActivity extends Activity {
         //LayoutParams for each table row child
         TableRow.LayoutParams layoutParams = new TableRow.LayoutParams(TableRow.LayoutParams.MATCH_PARENT,TableRow.LayoutParams.WRAP_CONTENT, 1.0f);
 
-        //LinearLayout.LayoutParams noResultsLayoutParams = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
+        //add recommendation text
+        TableRow recommendationRow = new TableRow(CalculatorActivity.this);
+        recommendationRow.setLayoutParams(tableRowLayoutParams);
+
+        EditText recommendationView = new EditText(CalculatorActivity.this);
+        layoutParams.span = 4;
+        layoutParams.topMargin = 20;
+        recommendationView.setLayoutParams(layoutParams);
+        recommendationView.setGravity(Gravity.CENTER_HORIZONTAL);
+        recommendationView.setTypeface(Typeface.create("sans-serif-light", Typeface.BOLD));
+        recommendationView.setTextColor(Color.parseColor("#222222"));
+        recommendationView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 30);
+        recommendationView.setText("Recommendation");
+
+        recommendationRow.addView(recommendationView);
+        resultsLayout.addView(recommendationRow);
 
 
         for(Payment payment : output.getPayments()){
@@ -353,23 +371,30 @@ public class CalculatorActivity extends Activity {
 
             TextView fromView = new TextView(CalculatorActivity.this);
             fromView.setLayoutParams(layoutParams);
-            fromView.setGravity(Gravity.FILL_HORIZONTAL);
+            fromView.setGravity(Gravity.CENTER_HORIZONTAL);
+            fromView.setTypeface(Typeface.create("sans-serif-light", Typeface.BOLD));
+            fromView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
             fromView.setText(from);
 
 
             TextView paysView = new TextView(CalculatorActivity.this);
             paysView.setLayoutParams(layoutParams);
-            paysView.setGravity(Gravity.LEFT);
+            paysView.setGravity(Gravity.CENTER_HORIZONTAL);
+            paysView.setTypeface(Typeface.create("sans-serif-light", Typeface.ITALIC));
             paysView.setText("pays");
 
             TextView toView = new TextView(CalculatorActivity.this);
             toView.setLayoutParams(layoutParams);
-            toView.setGravity(Gravity.LEFT);
+            toView.setGravity(Gravity.CENTER_HORIZONTAL);
+            toView.setTypeface(Typeface.create("sans-serif-light", Typeface.BOLD));
+            toView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
             toView.setText(to);
 
             TextView amountView = new TextView(CalculatorActivity.this);
             amountView.setLayoutParams(layoutParams);
-            amountView.setGravity(Gravity.RIGHT);
+            amountView.setGravity(Gravity.CENTER_HORIZONTAL);
+            amountView.setTypeface(Typeface.create("sans-serif-light", Typeface.NORMAL));
+            amountView.setTextSize(TypedValue.COMPLEX_UNIT_SP, 20);
             amountView.setText(amountStr);
 
             //Add new TableRow to TableLayout
