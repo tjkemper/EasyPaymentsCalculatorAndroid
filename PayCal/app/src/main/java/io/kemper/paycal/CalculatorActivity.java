@@ -12,6 +12,7 @@ import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -117,6 +118,15 @@ public class CalculatorActivity extends Activity {
             if(!TextUtils.isEmpty(expenseText)){
                 expense.setText(expenseText);
             }
+
+            expense.setOnKeyListener(new View.OnKeyListener() {
+
+                @Override
+                public boolean onKey(View v, int keyCode, KeyEvent event) {
+                    expense.setSelection(expense.getText().length());
+                    return false;
+                }
+            });
 
             expense.addTextChangedListener(new TextWatcher() {
 
